@@ -1,0 +1,9 @@
+{
+  "name": "private-module-manager",
+  "version": "0.0.1",
+  "description": "Manage private npm modules on github.",
+  "main": "index.js",
+  "author": "Philip Roberts",
+  "license": "MIT",
+  "bin": "./bin/private-modules"
+}

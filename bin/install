@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+
+var path = require('path');
+var exec = require('child_process').exec;
+
+var parentDir = process.cwd();
+
+var privateModulesDir = path.join(parentDir, 'private_modules');
+var clone_script = process.ENV.PMM_CLONE_SCRIPT || path.join(__dirname, 'dev_clone_repo');
+
+var installDep = function (reponame, giturl, done) {
+    console.log('\nInstalling', reponame, 'from', giturl);
+    var parts, branch;
+
+    parts = giturl.split('#');
+    giturl = parts[0];
+    branch = parts[1] || 'master';
+
+    var cloneDir = path.join(privateModulesDir, reponame);
+
+    console.log(' - Making', privateModulesDir);
+    console.log(' - Deleting', cloneDir);
+    exec('mkdir -p ' + privateModulesDir + ' && rm -rf ' + cloneDir, function (err) {
+        if (err) throw 'Error clearing the decks for repo clones: ' + err.toString();
+
+        console.log(' - Calling clone script with', reponame, giturl, cloneDir);
+        exec(clone_script + ' ' + [reponame, giturl, cloneDir].join(' '), function (err) {
+            if (err) throw err;
+
+            console.log(' - Checking out', branch, 'branch');
+            exec('cd ' + cloneDir + ' && git checkout origin/'+branch, function (err) {
+                if (err) throw err;
+
+                console.log(' - Running npm install on', cloneDir);
+                exec('npm install ' + cloneDir, function (err) {
+                    if (err) throw err;
+                    done();
+                });
+            });
+        });
+    });
+};
+
+
+var package = require(path.join(process.cwd(), 'package.json'));
+var privateDependencies = package.privateDependencies || {};
+var depNames = Object.keys(privateDependencies);
+var depIndex = -1;
+
+if (depNames.length > 0) {
+    console.log('Found private packages to install: ' + depNames.join(', '));
+    var installNext = function () {
+        depIndex++;
+        var name = depNames[depIndex];
+        if (!name) return;
+        var giturl = privateDependencies[name];
+
+        installDep(name, giturl, installNext);
+    };
+
+    installNext();
+}

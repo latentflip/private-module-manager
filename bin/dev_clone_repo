@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# dev_clone_repo meetings-client git@github.com:dsm-platform/meetings-client /path/to/clone/to
+# $1: reponame
+# $2: repourl
+# $3: dir to clone to
+
+
+git clone $2 $3
