@@ -23,20 +23,16 @@ var installDep = function (reponame, giturl, done) {
     exec('mkdir -p ' + privateModulesDir + ' && rm -rf ' + cloneDir, function (err) {
         if (err) throw 'Error clearing the decks for repo clones: ' + err.toString();
 
-        console.log(' - Calling clone script with', reponame, giturl, cloneDir);
-        exec(clone_script + ' ' + [reponame, giturl, cloneDir].join(' '), function (err) {
+        console.log(' - Calling clone script with', reponame, giturl, cloneDir, branch);
+        exec(clone_script + ' ' + [reponame, giturl, cloneDir, branch].join(' '), function (err) {
             if (err) throw err;
 
-            console.log(' - Checking out', branch, 'branch');
-            exec('cd ' + cloneDir + ' && git checkout origin/'+branch, function (err) {
+            console.log(' - Running npm install on', cloneDir);
+            exec('npm install ' + cloneDir, function (err) {
                 if (err) throw err;
-
-                console.log(' - Running npm install on', cloneDir);
-                exec('npm install ' + cloneDir, function (err) {
-                    if (err) throw err;
-                    done();
-                });
+                done();
             });
+            //});
         });
     });
 };
