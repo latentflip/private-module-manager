@@ -5,5 +5,5 @@
   "main": "index.js",
   "author": "Philip Roberts",
   "license": "MIT",
-  "bin": "./bin/private-module-manager"
+  "bin": "./bin/install"
 }
